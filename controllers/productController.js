@@ -1,4 +1,5 @@
 const Product = require("../models/Product");
+const { filterProducts, createProduct } = require('../utils/productUtils');
 
 // Obtener todos los productos
 const getAllProducts = async (req, res) => {
@@ -8,6 +9,13 @@ const getAllProducts = async (req, res) => {
   } catch (err) {
     res.status(500).json({ message: "Error al obtener los productos", error: err });
   }
+};
+
+const getFilteredProducts = async (req, res) => {
+  const { genre, ageRange, category, tags } = req.query;
+  console.log(req.query)
+  const products = await filterProducts({ genre, ageRange, category, tags });
+  res.json(products);
 };
 
 // Obtener un producto por ID
@@ -22,16 +30,19 @@ const getProductById = async (req, res) => {
 };
 
 // Crear un nuevo producto
-const createProduct = async (req, res) => {
-  try {
-    const newProduct = new Product(req.body);
-    const savedProduct = await newProduct.save();
-    res.status(201).json(savedProduct);
-  } catch (err) {
-    res.status(400).json({ message: "Error al crear el producto", error: err });
-  }
-};
-
+const createNewProduct = async (req, res) => {
+    try {
+      const { name, description, price, category, genre, ageRange, tags, image } = req.body;
+      const newProduct = await createProduct({ name, description, price, category, genre, ageRange, tags, image });
+      res.status(201).json({ message: 'Producto creado con éxito', product: newProduct });
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ message: 'Error al crear el producto' });
+      
+console.log(req.body)
+    }
+  };
+  
 // Actualizar un producto por ID
 const updateProduct = async (req, res) => {
   try {
@@ -57,7 +68,8 @@ const deleteProduct = async (req, res) => {
 module.exports = {
   getAllProducts,
   getProductById,
-  createProduct,
+  createNewProduct,
   updateProduct,
   deleteProduct,
+  getFilteredProducts
 };

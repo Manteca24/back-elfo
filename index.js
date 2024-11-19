@@ -27,9 +27,9 @@ app.use('/products', productRouter);  // Prefijo para las rutas de productos
 
 
 app.get("/", (req, res) => {
-    // res.send("elfo backend is working! 🎉");
     res.redirect('/products'); 
   });
+
 
 
 const PORT = process.env.PORT || 3000;
