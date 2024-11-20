@@ -19,11 +19,22 @@ app.use(express.urlencoded({ extended: true })); // para manejar datos de formul
 
 /*---------------------*/
 
-
-const productRouter = require('./routes/productRoutes');
-app.use('/products', productRouter);  // Prefijo para las rutas de productos
 // const authRouter = require('./routes/authRoutes');
 // app.use('/auth', authRouter);  // Prefijo para las rutas de autenticación
+
+const productRouter = require('./routes/productRoutes');
+const userRoutes = require('./routes/userRoutes');
+// const categoryRoutes = require('./routes/categoryRoutes');
+// const searchRoutes = require('./routes/searchRoutes');
+const commentRoutes = require('./routes/commentRoutes');
+const { getUserById } = require("./controllers/userController");
+
+app.use('/products', productRouter);  // Prefijo para las rutas de productos
+app.use('/users', userRoutes);     // Rutas de usuarios
+// app.use('/api', categoryRoutes); // Rutas de categorías
+// app.use('/api', searchRoutes);   // Ruta de búsqueda de productos
+app.use('/comments', commentRoutes);  // Rutas de comentarios
+
 
 
 app.get("/", (req, res) => {

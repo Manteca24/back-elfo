@@ -14,8 +14,8 @@ const router = express.Router();
 router.get("/", getAllProducts); // Obtener todos los productos
 router.get("/filter", getFilteredProducts) // Obtener productos filtrados
 router.get("/:id", getProductById); // Obtener un producto por ID
-router.post("/", createNewProduct); // Crear un nuevo producto
-router.put("/:id", updateProduct); // Actualizar un producto por ID
-router.delete("/:id", deleteProduct); // Eliminar un producto por ID
+router.post("/", createNewProduct); // Crear un nuevo producto (SOLO REGISTRADOS)
+router.put("/:id", updateProduct); // Actualizar un producto por ID (SOLO CREADOR)
+router.delete("/:id", deleteProduct); // Eliminar un producto por ID (SOLO CREADOR Y ADMIN)
 
 module.exports = router;
