@@ -1,56 +1,55 @@
-const Product = require('../models/Product');
+const Product = require("../models/Product")
 
-const filterProducts = async ({ genre, ageRange, category, tags }) => {
-  try {
-    const filters = {};
-    // Si el género es "no relevante", incluye todos los géneros
-    if (genre) {
-      if (genre === "no relevante") {
-        filters.genre = { $in: ["masculino", "femenino", "no relevante"] };
-      } else {
-        filters.genre = genre;
-      }
-    }
-
-    if (ageRange) filters.ageRange = ageRange;
-    if (category) filters.category = category;
-
-    // Manejar múltiples tags
-    if (tags && typeof tags === "string") {
-      const tagArray = tags.split(",").map((tag) => tag.trim()).filter(Boolean);
-      if (tagArray.length > 0) {
-        filters.tags = { 
-          $all: tagArray }; ///!!!! $in busca que tenga alguno de los tags, $all que los cumpla todos
-      }
-    }
-
-    return await Product.find(filters);
-  } catch (error) {
-    console.error("Error al filtrar productos:", error);
-    throw error;
-  }
-};
-
-
-// función para crear producto
-const createProduct = ({ name, description, price, category, genre, ageRange, tags, image }) => {
-  // Si tags ya es un array, úsalo tal cual; si es una string, divídelo
+const createProduct = ({ name, description, price, categories, genre, ageRange, tags, image, user }) => {
+  // Le digo: si tags ya es un array, úsalo tal cual; si es una string, divídelo
   const tagArray = Array.isArray(tags) ? tags : (tags ? tags.split(',').map(tag => tag.trim()) : []);
+
+// formatear para asegurar la estructura correcta
+  const formattedCategories = categories.map((cat) => ({
+    category: cat.category,
+    filters: cat.filters,
+  }));
+
+
   const newProduct = new Product({
     name,
     description,
     price,
-    category,
+    categories: formattedCategories, 
     genre,
     ageRange,
-    tags: tagArray, // Guardar tags como un array
+    tags: tagArray,
     image,
+    user,
   });
 
-  return newProduct.save(); // Guarda el producto en la base de datos
+  return newProduct.save();
+};
+
+const addCategory = async (productId, categoryId) => {
+  try {
+    const product = await Product.findById(productId);
+    
+    if (!product) {
+      throw new Error('Producto no encontrado');
+    }
+
+    if (product.filters.includes(categoryId)) {
+      throw new Error('Esta categoría ya está asignada a este producto');
+    }
+
+    product.filters.push(categoryId);
+
+    await product.save();
+    return product;  
+
+  } catch (error) {
+    console.error(error);
+    throw new Error('Error al añadir categoría al producto');
+  }
 };
 
 module.exports = {
-  filterProducts,
-  createProduct
+  createProduct,
+  addCategory
 };

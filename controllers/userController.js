@@ -33,7 +33,9 @@ const getUserByUserName = async (req, res) => {
 // Obtener un usuario por su ID
 const getUserById = async (req, res) => {
     try {
-        const user = await User.findById(req.params.userId);
+        const user = await User.findById(req.params.userId)
+        .populate('favoriteProducts')
+        .populate('savedPeople.filters');;
         if (!user) {
             return res.status(404).json({ message: 'Usuario no encontrado' + {userId} });
           }
@@ -46,37 +48,12 @@ const getUserById = async (req, res) => {
 };
 
 
-// Obtener productos favoritos por ID de usuario
-const getFavoriteProductsByUserId = async (req, res) => {
-  const { userId } = req.params; 
-
-  try {
-    const user = await User.findById(userId).populate('favoriteProducts', 'name'); 
-    // aquí añado la propiedad que quiera que muestre de products (en este caso solo name)
-
-    if (!user) {
-      return res.status(404).json({ message: 'Usuario no encontrado' });
-    }
-
-    if (!user.favoriteProducts || user.favoriteProducts.length === 0) {
-      return res.status(404).json({ message: 'No se encontraron productos favoritos para este usuario' });
-    }
-
-    res.status(200).json(user.favoriteProducts);
-
-  } catch (error) {
-    console.error('Error al obtener los productos favoritos:', error);
-    res.status(500).json({ message: 'Error al obtener los productos favoritos' });
-  }
-};
-
-
 // Crear un nuevo usuario
 const createUser = async (req, res) => {
-  const { fullName, username, email, password, birthday, profilePicture, bio, tags, favoriteProducts} = req.body;
+  const { fullName, username, email, password, birthday, profilePicture, bio, tags, favoriteProducts, savedPeople} = req.body;
   
   try {
-    const newUser = new User({ fullName, username, email, password, birthday, profilePicture, bio, tags, favoriteProducts});
+    const newUser = new User({ fullName, username, email, password, birthday, profilePicture, bio, tags, favoriteProducts, savedPeople});
     await newUser.save();
     res.status(201).json(newUser);
   } catch (error) {
@@ -88,7 +65,7 @@ const createUser = async (req, res) => {
 const updateUser = async (req, res) => {
     try {
         const { userId } = req.params; 
-        const { fullName, email, password, birthday, profilePicture, bio, tags, favoriteProducts, isAdmin, status } = req.body;
+        const { fullName, email, password, birthday, profilePicture, bio, tags, favoriteProducts, isAdmin, status, savedPeople } = req.body;
 
         const user = await User.findById(userId);
         if (!user) {
@@ -104,6 +81,7 @@ const updateUser = async (req, res) => {
         user.profilePicture = profilePicture || user.profilePicture;
         user.tags = tags || user.tags;
         user.favoriteProducts = favoriteProducts || user.favoriteProducts;
+        user.savedPeople = savedPeople || user.savedPeople;
         user.isAdmin = isAdmin !== undefined ? isAdmin : user.isAdmin;
         user.status = status || user.status;
         
@@ -136,7 +114,6 @@ module.exports = {
   getUsers,
   getUserByUserName,
   getUserById,
-  getFavoriteProductsByUserId,
   createUser,
   updateUser,
   deleteUser

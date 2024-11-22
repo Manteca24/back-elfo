@@ -20,12 +20,24 @@ const userSchema = new mongoose.Schema({
   profilePicture: { type: String, default: null },
   bio: { type: String, maxlength: 280 },
   tags: Product.obj.tags, // Hereda las etiquetas
-  favoriteProducts: [{ 
-      type: mongoose.Schema.Types.ObjectId, 
-      ref: 'Product' // Referencia a la colección Product para luego usar .populate
-  }],
+  
+  favoriteProducts: [
+    {
+      product: { type: mongoose.Schema.Types.ObjectId, ref: 'Product' }, // Producto favorito
+      type: { type: String, enum: ['self', 'savedPerson'], default: 'self' }, // Indica si es para uno mismo o para otra persona
+      relatedPerson: { type: mongoose.Schema.Types.ObjectId, ref: 'SavedPerson' }, // Id de la persona para la que es el favorito
+    }
+  ],
+  
+  savedPeople: [
+    {
+      name: { type: String, required: true }, // Nombre de la persona guardada
+      filters: { type: mongoose.Schema.Types.ObjectId, ref: 'Filter' }, // Filtros asociados a esta persona
+    }
+  ],
+
   comments: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Comment' }],
-  createdAt: { type: Date, default: Date.now }, // cuando se crea el usuario
+  createdAt: { type: Date, default: Date.now }, // cuándo se creó el usuario
   updatedAt: { type: Date, default: Date.now }, // última actualización
   isAdmin: { type: Boolean, default: false }, // Si es administrador
   status: { type: String, enum: ['active', 'inactive', 'banned'], default: 'active' }

@@ -1,27 +1,24 @@
 const Product = require("../models/Product");
-const { filterProducts, createProduct } = require('../utils/productUtils');
+const { createProduct } = require('../utils/productUtils');
 
 // Obtener todos los productos
 const getAllProducts = async (req, res) => {
   try {
-    const products = await Product.find();
+    const products = await Product.find()
+      .populate('categories.category', 'name') // Populate las categorías
+      .populate('categories.filters', 'name'); // Populate los filtros
     res.status(200).json(products);
   } catch (err) {
     res.status(500).json({ message: "Error al obtener los productos", error: err });
   }
 };
 
-const getFilteredProducts = async (req, res) => {
-  const { genre, ageRange, category, tags } = req.query;
-  console.log(req.query)
-  const products = await filterProducts({ genre, ageRange, category, tags });
-  res.json(products);
-};
-
 // Obtener un producto por ID
 const getProductById = async (req, res) => {
   try {
-    const product = await Product.findById(req.params.id);
+    const product = await Product.findById(req.params.id)
+      .populate('categories.category', 'name')
+      .populate('categories.filters', 'name');
     if (!product) return res.status(404).json({ message: "Producto no encontrado" });
     res.status(200).json(product);
   } catch (err) {
@@ -31,22 +28,65 @@ const getProductById = async (req, res) => {
 
 // Crear un nuevo producto
 const createNewProduct = async (req, res) => {
-    try {
-      const { name, description, price, category, genre, ageRange, tags, image } = req.body;
-      const newProduct = await createProduct({ name, description, price, category, genre, ageRange, tags, image });
-      res.status(201).json({ message: 'Producto creado con éxito', product: newProduct });
-    } catch (err) {
-      console.error(err);
-      res.status(500).json({ message: 'Error al crear el producto' });
-      
-console.log(req.body)
+  try {
+    const {
+      name,
+      description,
+      price,
+      categories, // Esto incluye tanto las categorías como sus filtros
+      genre,
+      ageRange,
+      tags,
+      image
+    } = req.body;
+    const { userId } = req.params; // Obtenemos el userId de los parámetros de la URL
+
+    // Verificamos que las categorías estén correctamente formateadas como un array de objetos
+    if (!Array.isArray(categories) || categories.length === 0) {
+      return res.status(400).json({ message: 'Debes proporcionar al menos una categoría con sus filtros.' });
     }
-  };
-  
+
+    // Creamos el producto utilizando la función `createProduct`
+    const newProduct = await createProduct({
+      name,
+      description,
+      price,
+      categories, // Ahora es un array de objetos que contiene categorías y filtros
+      genre,
+      ageRange,
+      tags,
+      image,
+      user: userId
+    });
+
+    // Enviamos la respuesta con el producto creado
+    res.status(201).json({ message: 'Producto creado con éxito', product: newProduct });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Error al crear el producto', error: err.message });
+  }
+};
+
 // Actualizar un producto por ID
 const updateProduct = async (req, res) => {
   try {
-    const updatedProduct = await Product.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    const { categories, ...otherFields } = req.body;
+
+    let updateData = { ...otherFields };
+
+    // Si hay categorías, las formateamos antes de actualizar
+    if (categories) {
+      const formattedCategories = categories.map((cat) => ({
+        category: cat.category,
+        filters: cat.filters,
+      }));
+      updateData.categories = formattedCategories;
+    }
+
+    const updatedProduct = await Product.findByIdAndUpdate(req.params.id, updateData, { new: true })
+      .populate('categories.category')
+      .populate('categories.filters');
+
     if (!updatedProduct) return res.status(404).json({ message: "Producto no encontrado" });
     res.status(200).json(updatedProduct);
   } catch (err) {
@@ -65,11 +105,34 @@ const deleteProduct = async (req, res) => {
   }
 };
 
+// Añadir una categoría a un producto
+const addCategoryToProduct = async (req, res) => {
+  const { productId } = req.params;
+  const { categoryId, filters } = req.body; // categoryId y filters son parte del body
+
+  try {
+    const updatedProduct = await Product.findByIdAndUpdate(
+      productId,
+      {
+        $push: {
+          categories: { category: categoryId, filters }, // Añadimos la nueva categoría
+        },
+      },
+      { new: true }
+    ).populate('categories.category').populate('categories.filters');
+
+    res.status(200).json({ message: 'Categoría añadida con éxito', product: updatedProduct });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Error al añadir la categoría', error: err });
+  }
+};
+
 module.exports = {
   getAllProducts,
   getProductById,
   createNewProduct,
   updateProduct,
   deleteProduct,
-  getFilteredProducts
+  addCategoryToProduct,
 };

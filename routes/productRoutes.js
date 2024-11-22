@@ -5,17 +5,15 @@ const {
   createNewProduct,
   updateProduct,
   deleteProduct,
-  getFilteredProducts,
+  addCategoryToProduct
 } = require("../controllers/productController");
 
 const router = express.Router();
 
-// Rutas para productos
 router.get("/", getAllProducts); // Obtener todos los productos
-router.get("/filter", getFilteredProducts) // Obtener productos filtrados
 router.get("/:id", getProductById); // Obtener un producto por ID
-router.post("/", createNewProduct); // Crear un nuevo producto (SOLO REGISTRADOS)
+router.post("/:userId", createNewProduct); // Crear un nuevo producto (SOLO REGISTRADOS)
 router.put("/:id", updateProduct); // Actualizar un producto por ID (SOLO CREADOR)
 router.delete("/:id", deleteProduct); // Eliminar un producto por ID (SOLO CREADOR Y ADMIN)
-
+router.post("/:productId/addCategory/:categoryId", addCategoryToProduct) // Añadir categoría existente a producto existente (SOLO ADMIN)
 module.exports = router;

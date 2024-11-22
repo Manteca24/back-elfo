@@ -5,35 +5,37 @@ const app = express();
 //bd
 const {dbConnection} = require('./config/db');
 require('dotenv').config();
+dbConnection(); // conectar a la base de datos
 
-// // sin esta línea no lee el token
-// const cookieParser = require("cookie-parser"); 
 
-// conectar a la base de datos
-dbConnection();
 
 // Middlewares
 app.use(express.json()); // para procesar JSON
 app.use(express.urlencoded({ extended: true })); // para manejar datos de formularios (body)
-// app.use(cookieParser()); // sin esta línea no lee el token
+// // sin estas línea no lee el token
+// const cookieParser = require("cookie-parser"); 
+// app.use(cookieParser());
 
 /*---------------------*/
 
 // const authRouter = require('./routes/authRoutes');
-// app.use('/auth', authRouter);  // Prefijo para las rutas de autenticación
+// app.use('/auth', authRouter);  // rutas de autenticación
 
 const productRouter = require('./routes/productRoutes');
 const userRoutes = require('./routes/userRoutes');
-// const categoryRoutes = require('./routes/categoryRoutes');
-// const searchRoutes = require('./routes/searchRoutes');
+const categoryRoutes = require('./routes/categoryRoutes');
 const commentRoutes = require('./routes/commentRoutes');
-const { getUserById } = require("./controllers/userController");
+const filterRoutes = require('./routes/filterRoutes');
+const tagRoutes = require('./routes/tagRoutes');
+const searchRoutes = require('./routes/searchRoutes');
 
-app.use('/products', productRouter);  // Prefijo para las rutas de productos
-app.use('/users', userRoutes);     // Rutas de usuarios
-// app.use('/api', categoryRoutes); // Rutas de categorías
-// app.use('/api', searchRoutes);   // Ruta de búsqueda de productos
-app.use('/comments', commentRoutes);  // Rutas de comentarios
+app.use('/products', productRouter);  
+app.use('/users', userRoutes);    
+app.use('/categories', categoryRoutes); 
+app.use('/comments', commentRoutes);  
+app.use('/filters', filterRoutes) 
+app.use('/tags', tagRoutes);
+app.use('/search', searchRoutes);  
 
 
 
