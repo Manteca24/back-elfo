@@ -1,22 +1,24 @@
 const Comment = require('../models/Comment');
 const Product = require('../models/Product');
-const User = require('../models/User');
+
+// funciones auxiliares
+const getUserFromFirebaseUid = require('../utils/userUtils')
 
 // crear comentario
 const addComment = async (req, res) => {
   const { productId } = req.params;
-  const { userId, comment } = req.body;
+  const { comment } = req.body;
 
   try {
-    const user = await User.findById(userId);
-    if (!user) return res.status(404).json({ message: 'Usuario no encontrado' });
+    // Obtener usuario autenticado desde Firebase
+    const user = await getUserFromFirebaseUid(req.user.firebaseUid);
 
     const product = await Product.findById(productId);
     if (!product) return res.status(404).json({ message: 'Producto no encontrado' });
 
     const newComment = new Comment({ 
       productId, 
-      userId, 
+      userId: user._id,
       comment 
     });
 
@@ -53,11 +55,11 @@ const getCommentsByProduct = async (req, res) => {
 
 // obtener comentarios de un usuario específico por su id
 const getCommentsByUserId = async (req, res) => {
-  const { userId } = req.params;
-
   try {
+    const user = await getUserFromFirebaseUid(req.user.firebaseUid);
+
     const comments = await Comment
-    .find({ userId })
+    .find({ userId: user._id })
     .populate('productId', 'name')
     
     if (comments.length === 0) {
@@ -76,7 +78,7 @@ const getCommentsByUserId = async (req, res) => {
 // editar comentario //// PENDIENTE JWT CUANDO AÑADA FIREBASE
 const updateComment = async (req, res) => {
   const { commentId } = req.params;
-  const { userId, newComment } = req.body; // 'newComment' es el nuevo texto del comentario
+  const { newComment } = req.body; // 'newComment' es el nuevo texto del comentario
 
   try {
     const comment = await Comment.findById(commentId);
@@ -85,7 +87,7 @@ const updateComment = async (req, res) => {
     }
 
     // verificar que el usuario que intenta editar el comentario es el autor - prueba! cambiar después de firebase
-    if (comment.userId.toString() !== userId) {
+    if (comment.userId.toString() !== req.user.firebaseUid) {
       return res.status(403).json({ message: 'No tienes permiso para editar este comentario' });
     }
     
@@ -106,6 +108,11 @@ const deleteComment = async (req, res) => {
   try {
     const comment = await Comment.findById(commentId);
     if (!comment) return res.status(404).json({ message: 'Comentario no encontrado' });
+  
+    // Verificar que el usuario autenticado sea el autor del comentario
+  if (comment.userId.toString() !== req.user.firebaseUid) {
+    return res.status(403).json({ message: 'No tienes permiso para eliminar este comentario' });
+  }
 
     const product = await Product.findById(comment.productId);
     if (!product) return res.status(404).json({ message: 'Producto no encontrado' });

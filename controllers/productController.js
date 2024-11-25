@@ -1,5 +1,9 @@
 const Product = require("../models/Product");
+
+// funciones auxiliares
 const { createProduct } = require('../utils/productUtils');
+const getUserFromFirebaseUid = require('../utils/userUtils')
+
 
 // Obtener todos los productos
 const getAllProducts = async (req, res) => {
@@ -39,7 +43,8 @@ const createNewProduct = async (req, res) => {
       tags,
       image
     } = req.body;
-    const { userId } = req.params; // Obtenemos el userId de los parámetros de la URL
+ 
+    const user = await getUserFromFirebaseUid(req.user.firebaseUid);
 
     // Verificamos que las categorías estén correctamente formateadas como un array de objetos
     if (!Array.isArray(categories) || categories.length === 0) {
@@ -56,7 +61,7 @@ const createNewProduct = async (req, res) => {
       ageRange,
       tags,
       image,
-      user: userId
+      user: user._id
     });
 
     // Enviamos la respuesta con el producto creado

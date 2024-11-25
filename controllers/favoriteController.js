@@ -1,10 +1,12 @@
-const User = require('../models/User');
 const Product = require('../models/Product');
 const SavedPerson = require('../models/SavedPerson');
 
+// funciones auxiliares
+const getUserFromFirebaseUid = require('../utils/userUtils')
+
+
 // Añadir un producto a favoritos
 const addFavorite = async (req, res) => {
-    const { userId } = req.params;
     const { productId, type, relatedPersonId } = req.body;
   
     try {
@@ -15,11 +17,8 @@ const addFavorite = async (req, res) => {
       }
   
       // Validar usuario
-      const user = await User.findById(userId);
-      if (!user) {
-        return res.status(404).json({ message: 'Usuario no encontrado' });
-      }
-  
+      const user = await getUserFromFirebaseUid(req.user.firebaseUid);
+
       // Validar persona guardada si el tipo es "savedPerson"
       if (type === 'savedPerson' && relatedPersonId) {
         const person = await SavedPerson.findById(relatedPersonId);
@@ -51,10 +50,9 @@ const addFavorite = async (req, res) => {
 
 // Obtener favoritos de un usuario
 const getFavorites = async (req, res) => {
-  const { userId } = req.params;
 
   try {
-    const user = await User.findById(userId)
+    const user = await getUserFromFirebaseUid(req.user.firebaseUid)
       .populate({
         path: 'favoriteProducts.product',
         select: 'name price category image',
@@ -64,7 +62,6 @@ const getFavorites = async (req, res) => {
         select: 'name filters',
       });
 
-    if (!user) return res.status(404).json({ message: 'Usuario no encontrado' });
 
     res.status(200).json(user.favoriteProducts);
   } catch (error) {
@@ -75,11 +72,11 @@ const getFavorites = async (req, res) => {
 
 // Eliminar un favorito
 const removeFavorite = async (req, res) => {
-  const { userId, favoriteId } = req.params;
+  const { favoriteId } = req.params;
 
   try {
-    const user = await User.findById(userId);
-    if (!user) return res.status(404).json({ message: 'Usuario no encontrado' });
+    const user = await getUserFromFirebaseUid(req.user.firebaseUid);
+
 
     // Filtrar el favorito
     user.favoriteProducts = user.favoriteProducts.filter(

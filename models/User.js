@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 const Product = require("./Product").schema;
 
 const userSchema = new mongoose.Schema({
+  firebaseUid: { type: String, required: true, unique: true },
   fullName: { 
     type: String, 
     required: true 

@@ -7,10 +7,12 @@ const {
   deleteProduct,
   addCategoryToProduct
 } = require("../controllers/productController");
+const verifyToken = require("../middlewares/auth");
 
 const router = express.Router();
 
 router.get("/", getAllProducts); // Obtener todos los productos
+router.get("/dashboard", verifyToken, getAllProducts); // Obtener todos los productos
 router.get("/:id", getProductById); // Obtener un producto por ID
 router.post("/:userId", createNewProduct); // Crear un nuevo producto (SOLO REGISTRADOS)
 router.put("/:id", updateProduct); // Actualizar un producto por ID (SOLO CREADOR)

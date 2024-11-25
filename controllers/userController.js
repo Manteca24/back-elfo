@@ -1,5 +1,8 @@
 const User = require('../models/User');
 
+// funciones auxiliares
+const getUserFromFirebaseUid = require('../utils/userUtils')
+
 // Obtener todos los usuarios
 const getUsers = async (req, res) => {
   try {
@@ -32,28 +35,37 @@ const getUserByUserName = async (req, res) => {
 
 // Obtener un usuario por su ID
 const getUserById = async (req, res) => {
-    try {
-        const user = await User.findById(req.params.userId)
-        .populate('favoriteProducts')
-        .populate('savedPeople.filters');;
-        if (!user) {
-            return res.status(404).json({ message: 'Usuario no encontrado' + {userId} });
-          }
+  try {
 
-        res.status(200).json(user);
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Error al obtener el usuario' });
-    }
+    const user = await getUserFromFirebaseUid(req.uid);
+
+      res.status(200).json({user});
+  } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: 'Error al obtener el usuario' });
+  }
 };
 
-
-// Crear un nuevo usuario
+// crear un usuario
 const createUser = async (req, res) => {
-  const { fullName, username, email, password, birthday, profilePicture, bio, tags, favoriteProducts, savedPeople} = req.body;
-  
+  const { firebaseUid, fullName, username, email, genre, password, birthday, profilePicture, bio, tags, favoriteProducts, savedPeople } = req.body;
+
   try {
-    const newUser = new User({ fullName, username, email, password, birthday, profilePicture, bio, tags, favoriteProducts, savedPeople});
+    const newUser = new User({
+      firebaseUid, // Agregar el UID recibido
+      fullName,
+      username,
+      email,
+      genre,
+      password,
+      birthday,
+      profilePicture,
+      bio,
+      tags,
+      favoriteProducts,
+      savedPeople,
+    });
+
     await newUser.save();
     res.status(201).json(newUser);
   } catch (error) {
@@ -63,45 +75,35 @@ const createUser = async (req, res) => {
 
 // Actualizar un usuario por su ID
 const updateUser = async (req, res) => {
-    try {
-        const { userId } = req.params; 
-        const { fullName, email, password, birthday, profilePicture, bio, tags, favoriteProducts, isAdmin, status, savedPeople } = req.body;
+  try {
+    const user = await getUserFromFirebaseUid(req.user.firebaseUid);
+      
+      // Actualizar los campos del usuario
+      const { fullName, email, password, birthday, profilePicture, bio, tags, favoriteProducts, isAdmin, status, savedPeople } = req.body;
+      user.fullName = fullName || user.fullName;
+      user.email = email || user.email;
+      user.password = password || user.password; // Asegúrate de hashear la contraseña
+      user.bio = bio || user.bio;
+      user.birthday = birthday || user.birthday;
+      user.profilePicture = profilePicture || user.profilePicture;
+      user.tags = tags || user.tags;
+      user.favoriteProducts = favoriteProducts || user.favoriteProducts;
+      user.savedPeople = savedPeople || user.savedPeople;
+      user.isAdmin = isAdmin !== undefined ? isAdmin : user.isAdmin;
+      user.status = status || user.status;
 
-        const user = await User.findById(userId);
-        if (!user) {
-            return res.status(404).json({ message: 'Usuario no encontrado' });
-        }
-        
-        // Actualizar los campos del usuario
-        user.fullName = fullName || user.fullName;
-        user.email = email || user.email;
-        user.password = password || user.password; // hashear!
-        user.bio = bio || user.bio;
-        user.birthday = birthday || user.birthday;
-        user.profilePicture = profilePicture || user.profilePicture;
-        user.tags = tags || user.tags;
-        user.favoriteProducts = favoriteProducts || user.favoriteProducts;
-        user.savedPeople = savedPeople || user.savedPeople;
-        user.isAdmin = isAdmin !== undefined ? isAdmin : user.isAdmin;
-        user.status = status || user.status;
-        
-        const updatedUser = await user.save();
-        res.status(200).json(updatedUser);
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Error al actualizar el usuario' });
-    }
+      const updatedUser = await user.save();
+      res.status(200).json(updatedUser);
+  } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: 'Error al actualizar el usuario' });
+  }
 };
 
 // Eliminar un usuario por su ID
 const deleteUser = async (req, res) => {
   try {
-    const { userId } = req.params;
-
-    const deletedUser = await User.findByIdAndDelete(userId);
-    if (!deletedUser) {
-      return res.status(404).json({ message: 'Usuario no encontrado' });
-    }
+    const user = await getUserFromFirebaseUid(req.user.firebaseUid);
 
     res.status(200).json({ message: 'Usuario eliminado exitosamente' });
   } catch (error) {

@@ -10,6 +10,12 @@ const {dbConnection} = require('./config/db');
 require('dotenv').config();
 dbConnection(); // conectar a la base de datos
 
+// firebase
+const admin = require('firebase-admin');
+const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount),
+});
 
 
 
@@ -22,8 +28,8 @@ app.use(express.urlencoded({ extended: true })); // para manejar datos de formul
 
 /*---------------------*/
 
-// const authRouter = require('./routes/authRoutes');
-// app.use('/auth', authRouter);  // rutas de autenticación
+const authRouter = require('./routes/authRoutes');
+app.use('/auth', authRouter);  // rutas de autenticación
 
 const productRouter = require('./routes/productRoutes');
 const userRoutes = require('./routes/userRoutes');
