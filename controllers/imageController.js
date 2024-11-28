@@ -1,33 +1,24 @@
-const multer = require('multer');
-const path = require('path');
+const mongoose = require('mongoose');
+const Grid = require('gridfs-stream');
 
-// Configuración de almacenamiento para multer
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, 'uploads/'); // Carpeta donde se guardarán las imágenes
-  },
-  filename: function (req, file, cb) {
-    cb(null, Date.now() + path.extname(file.originalname)); // Nombre único para cada archivo
-  }
+// Configurar GridFS para leer archivos
+const {dbConnection} = require('../config/db');
+let gfs;
+
+dbConnection().then((db) => {
+  gfs = Grid(db, mongoose.mongo); // Inicializar GridFS
+  gfs.collection('uploads'); // Seleccionar el bucket donde se guardarán los archivos
 });
 
-// Middleware de multer para subir una sola imagen
-const upload = multer({ storage }).single('image');
-
-// Controlador para manejar la subida de imágenes
 const uploadImage = (req, res) => {
-  upload(req, res, (err) => {
-    if (err) {
-      return res.status(500).json({ message: 'Error al subir la imagen.', error: err });
-    }
-    if (!req.file) {
-      return res.status(400).json({ message: 'No se subió ninguna imagen.' });
-    }
+  // El middleware de multer se encargará de subir el archivo a GridFS
+  // y se retornará la URL del archivo
+  if (!req.file) {
+    return res.status(400).json({ message: 'No se subió ninguna imagen' });
+  }
 
-    // Devolver la URL de la imagen subida
-    const imageUrl = `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`;
-    res.status(200).json({ imageUrl });
-  });
+  const imageUrl = `${req.protocol}://${req.get('host')}/files/${req.file.filename}`;
+  return res.status(200).json({ imageUrl });
 };
 
 module.exports = { uploadImage };
