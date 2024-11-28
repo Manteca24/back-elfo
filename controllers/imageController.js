@@ -4,9 +4,7 @@ const path = require('path');
 // Configuración de almacenamiento para multer
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    // Usar una carpeta diferente en producción si es necesario
-    const uploadPath = 'uploadsDir/' // 'uploads/'
-    cb(null, path.join(__dirname, uploadPath));  //
+    cb(null, path.join(__dirname, 'uploads'));  //
   },
   filename: function (req, file, cb) {
     cb(null, Date.now() + path.extname(file.originalname)); // Nombre único para cada archivo
