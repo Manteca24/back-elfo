@@ -7,6 +7,7 @@ app.use(cors());
 
 //bd
 const {dbConnection} = require('./config/db');
+
 require('dotenv').config();
 dbConnection(); // conectar a la base de datos
 

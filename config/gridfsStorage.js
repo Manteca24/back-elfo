@@ -1,19 +1,39 @@
-const mongoose = require('mongoose');
-const Grid = require('gridfs-stream');
 const multer = require('multer');
-const multerGridFsStorage = require('multer-gridfs-storage');
+const mongoose = require('mongoose');
+const { GridFsStorage } = require('multer-gridfs-storage'); // Importación correcta
+const Grid = require('gridfs-stream')
+const { dbConnection, db } = require('./db'); // Conexión exportada desde db.js
 
-// Crear el almacenamiento con Multer para usar GridFS
-const storage = new multerGridFsStorage({
-  url: process.env.MONGO_URI, // URI de MongoDB
+let gfs;
+
+dbConnection().then(() => {
+//   const conn = mongoose.connection;
+  gfs = Grid(db, mongoose.mongo);  // Pasamos la conexión y mongo al constructor de Grid
+  gfs.collection('uploads');  // Aseguramos que la colección 'uploads' sea usada
+
+  // Aquí es donde ya puedes hacer operaciones de GridFS
+  db.once('open', () => {
+    console.log('Conexión a MongoDB abierta y lista para usar GridFS');
+  });
+}).catch((err) => {
+  console.error('Error al conectar a MongoDB', err);
+});
+
+// Configuración de multer-gridfs-storage
+const storage = new GridFsStorage({
+  url: process.env.MONGO_URI,
   file: (req, file) => {
-    return {
-      bucketName: 'uploads', // Nombre del bucket donde almacenar los archivos
-      filename: `${Date.now()}-${file.originalname}`, // El nombre del archivo
-    };
+    return new Promise((resolve, reject) => {
+      const filename = `${Date.now()}-${file.originalname}`;
+      const fileInfo = {
+        filename: filename,
+        bucketName: 'uploads', // El nombre de la colección en GridFS
+      };
+      resolve(fileInfo);
+    });
   },
 });
 
-const upload = multer({ storage }).single('image');
+const upload = multer({ storage });
 
 module.exports = upload;
