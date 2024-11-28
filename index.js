@@ -58,7 +58,7 @@ app.use('/tags', tagRoutes);
 app.use('/search', searchRoutes);  
 
 // para las imágenes
-app.use('/uploads', express.static('uploads'));
+app.use('/uploads', express.static('uploadsDir'));
 app.use('/images', imageRoutes);
 
 app.get("/", (req, res) => {
