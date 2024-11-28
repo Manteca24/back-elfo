@@ -30,7 +30,7 @@ const getProductById = async (req, res) => {
   }
 };
 
-// Crear un nuevo producto
+// Crear un nuevo producto ESTA FUNCIÓN ESTA GENIAL COMPUESTA!!!!
 const createNewProduct = async (req, res) => {
   try {
     const {

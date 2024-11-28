@@ -17,7 +17,16 @@ admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
 });
 
+// crear carpeta "uploads"
+const fs = require('fs');
+const path = require ('path');
 
+const uploadsDir = path.join(__dirname, 'uploads'); // ruta absoluta 
+
+if (!fs.existsSync(uploadsDir)) { // solo la crea si la carpeta no existe
+  fs.mkdirSync(uploadsDir, { recursive: true });
+  console.log('Carpeta uploads creada');
+}
 
 // Middlewares
 app.use(express.json()); // para procesar JSON
@@ -38,6 +47,7 @@ const commentRoutes = require('./routes/commentRoutes');
 const filterRoutes = require('./routes/filterRoutes');
 const tagRoutes = require('./routes/tagRoutes');
 const searchRoutes = require('./routes/searchRoutes');
+const imageRoutes = require('./routes/imageRoutes')
 
 app.use('/products', productRouter);  
 app.use('/users', userRoutes);    
@@ -47,7 +57,9 @@ app.use('/filters', filterRoutes)
 app.use('/tags', tagRoutes);
 app.use('/search', searchRoutes);  
 
-
+// para las imágenes
+app.use('/uploads', express.static('uploadsDir'));
+app.use('/images', imageRoutes);
 
 app.get("/", (req, res) => {
     res.redirect('/products'); 

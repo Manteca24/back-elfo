@@ -36,3 +36,6 @@ package-lock.json
 # Archivos de sistema
 .DS_Store
 Thumbs.db
+
+# Carpeta de imágenes subidas por los usuarios
+uploads

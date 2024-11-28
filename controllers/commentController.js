@@ -7,17 +7,16 @@ const getUserFromFirebaseUid = require('../utils/userUtils')
 // crear comentario
 const addComment = async (req, res) => {
   const { productId } = req.params;
-  const { comment } = req.body;
-
+  const { comment, firebaseUid } = req.body;
   try {
     // Obtener usuario autenticado desde Firebase
-    const user = await getUserFromFirebaseUid(req.user.firebaseUid);
-
+    const user = await getUserFromFirebaseUid(firebaseUid);
+    
     const product = await Product.findById(productId);
     if (!product) return res.status(404).json({ message: 'Producto no encontrado' });
-
+    
     const newComment = new Comment({ 
-      productId, 
+      productId: productId, 
       userId: user._id,
       comment 
     });
@@ -45,7 +44,7 @@ const getCommentsByProduct = async (req, res) => {
 
   try {
     const comments = await Comment.find({ productId })
-    .populate('userId', 'username'); 
+    .populate('userId', 'username profilePicture createdAt isAdmin'); 
     res.json(comments);
 
   } catch (error) {
