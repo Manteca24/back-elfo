@@ -41,11 +41,12 @@ const createNewProduct = async (req, res) => {
       genre,
       ageRange,
       tags,
-      image
+      image,
+      firebaseUid
     } = req.body;
  
-    const user = await getUserFromFirebaseUid(req.user.firebaseUid);
-
+    const user = await getUserFromFirebaseUid(firebaseUid);
+    console.log(firebaseUid)
     // Verificamos que las categorías estén correctamente formateadas como un array de objetos
     if (!Array.isArray(categories) || categories.length === 0) {
       return res.status(400).json({ message: 'Debes proporcionar al menos una categoría con sus filtros.' });
@@ -61,7 +62,7 @@ const createNewProduct = async (req, res) => {
       ageRange,
       tags,
       image,
-      user: user._id
+      user
     });
 
     // Enviamos la respuesta con el producto creado

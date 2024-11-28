@@ -1,5 +1,7 @@
+const Category = require('../models/Category');
 const Filter = require('../models/Filter');
 
+// crear filtro
 const createFilter = async (req, res) => {
     try {
       const { name } = req.body;
@@ -10,6 +12,7 @@ const createFilter = async (req, res) => {
     }
   }
 
+// obtener todos los filtros
 const getFilters = async (req, res) => {
     try {
       const filters = await Filter.find().populate('category', 'name');
@@ -20,6 +23,7 @@ const getFilters = async (req, res) => {
     }
   }
 
+  // añadir tags al filtro
   const addTagsToFilter = async (req, res) => {
     try {
       const { filterId } = req.params;
@@ -49,9 +53,33 @@ const getFilters = async (req, res) => {
     }
   };
 
+  // función recomendada para organización en el front, 
+  const getFiltersGroupedByCategory = async (req, res) => {
+    try {
+      // Obtenemos las categorías y sus filtros asociados
+      const categories = await Category.find().populate('filters'); 
+  
+      // Estructuramos los datos
+      const result = categories.map((category) => ({
+        _id: category._id,
+        name: category.name,
+        filters: category.filters.map((filter) => ({
+          _id: filter._id,
+          name: filter.name,
+        })),
+      }));
+  
+      // Enviamos los datos estructurados
+      res.status(200).json(result);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: 'Error al obtener filtros agrupados por categoría' });
+    }
+  };
 
 module.exports = {
     createFilter,
     getFilters,
-    addTagsToFilter
+    addTagsToFilter,
+    getFiltersGroupedByCategory
 }

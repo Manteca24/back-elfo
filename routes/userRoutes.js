@@ -7,7 +7,8 @@ const {
     getUserById,
     createUser,
     updateUser,
-    deleteUser
+    deleteUser,
+    getUserByMongoId
 } = require('../controllers/userController');
 
 const {
@@ -24,6 +25,7 @@ const {
 
 router.get('/', getUsers); // obtener todos los usuarios
 router.get('/username/:username', getUserByUserName); // obtener usuario por su username
+router.get('/user/:id', getUserByMongoId)
 router.get('/user', verifyToken, getUserById); // obtener usuario por su id
 router.post('/user', createUser); // crear nuevo usuario 
 router.put('/user', verifyToken, updateUser); // actualizar usuario (SOLO USER Y ADMIN)

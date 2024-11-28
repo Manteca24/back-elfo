@@ -46,6 +46,22 @@ const getUserById = async (req, res) => {
   }
 };
 
+// Obtener usuario por Mongo ID
+const getUserByMongoId = async (req, res) => {
+  try {
+    const { id } = req.params; // Obtén el ID de los parámetros de la URL
+    const user = await User.findById(id); // Busca el usuario por ID
+
+    if (!user) {
+      return res.status(404).json({ message: 'Usuario no encontrado' });
+    }
+
+    res.status(200).json(user); // Devuelve el usuario en formato JSON
+  } catch (error) {
+    res.status(500).json({ message: 'Error al obtener el usuario', error });
+  }
+};
+
 // crear un usuario
 const createUser = async (req, res) => {
   const { firebaseUid, fullName, username, email, genre, password, birthday, profilePicture, bio, tags, favoriteProducts, savedPeople } = req.body;
@@ -118,5 +134,6 @@ module.exports = {
   getUserById,
   createUser,
   updateUser,
-  deleteUser
+  deleteUser,
+  getUserByMongoId
 };
