@@ -1,14 +1,14 @@
-const Grid = require('gridfs-stream');
-const mongoose = require('mongoose');
-const { db } = require('../config/db');  // Importa la conexión de la base de datos
-
-// Inicializar GridFS+
-console.log(db)
-const gfs = Grid(db, mongoose.mongo);
-gfs.collection('uploads'); // Asegúrate de que "uploads" sea el nombre de tu colección
+const upload = require('../config/gridfsStorage'); // Importa el middleware de multer con gridfs-storage
 
 const uploadImage = (req, res) => {
-  // Aquí iría tu lógica para guardar la imagen en GridFS
+  if (req.file) {
+    // Si el archivo se ha subido correctamente, puedes devolver el ID de GridFS
+    res.status(200).json({
+      imageUrl: `/uploads/${req.file.id}`,  // Utiliza el ID del archivo en GridFS
+    });
+  } else {
+    res.status(400).json({ message: 'No se ha cargado el archivo' });
+  }
 };
 
 module.exports = {
