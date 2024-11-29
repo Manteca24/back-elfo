@@ -1,7 +1,9 @@
 const upload = require('../config/gridfsStorage'); // Importa el middleware de multer con gridfs-storage
 
 const uploadImage = (req, res) => {
+  console.log(req.file)
   if (req.file) {
+
     // Si el archivo se ha subido correctamente, puedes devolver el ID de GridFS
     res.status(200).json({
       imageUrl: `/uploads/${req.file.id}`,  // Utiliza el ID del archivo en GridFS
