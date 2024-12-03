@@ -38,7 +38,7 @@ router.delete('/:userId/favorites/:favoriteId', verifyToken, removeFavorite); //
 
 
 router.post('/saved-people', addSavedPerson); // añadir una persona a "mis personas" con sus propios filtros guardados (SOLO USER Y ADMIN)
-router.get('/saved-people/:firebaseUid', getSavedPeople); // obtener "mis personas" de un usuario concreto por su id (SOLO USER Y ADMIN)
+router.get('/saved-people/', verifyToken, getSavedPeople); // obtener "mis personas" de un usuario concreto por su id (SOLO USER Y ADMIN)
 router.put('/saved-people/:personId/filters/:filterId/tags', updateTags);
  // actualizar los tags de una de tus personas (SOLO USER Y ADMIN)
 router.delete('/saved-people/:personId', removeSavedPerson); // borrar una persona de "tus personas" (SOLO USER Y ADMIN)

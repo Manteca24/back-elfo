@@ -7,7 +7,7 @@ const addSavedPerson = async (req, res) => {
 
   try {
     // Obtener el usuario autenticado con firebaseUid
-    const user = await getUserFromFirebaseUid(req.user.firebaseUid);
+    const user = await getUserFromFirebaseUid(req.uid); //AQUI req.user.firebaseUid
 
     // Validar filtros y su estructura
     if (!Array.isArray(filters) || filters.some(f => !f.filterId)) {
@@ -35,7 +35,9 @@ const addSavedPerson = async (req, res) => {
 // Obtener personas guardadas de un usuario
 const getSavedPeople = async (req, res) => {
   try {
-    const user = await getUserFromFirebaseUid(req.user.firebaseUid);
+    // Pasa req.uid directamente, no como parte de un objeto
+    const user = await getUserFromFirebaseUid(req.uid); 
+
     const savedPeople = await SavedPerson.find({ userId: user._id }).populate({
       path: 'filters.filterId',
       select: 'name tags',
