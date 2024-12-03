@@ -16,7 +16,7 @@ const userSchema = new mongoose.Schema({
   },
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
-  genre: Product.obj.genre, // Hereda las opciones de género de Product
+  gender: Product.obj.gender, // Hereda las opciones de género de Product
   birthday: { type: Date },
   profilePicture: { type: String, default: null },
   bio: { type: String, maxlength: 280 },

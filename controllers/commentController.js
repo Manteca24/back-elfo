@@ -55,7 +55,8 @@ const getCommentsByProduct = async (req, res) => {
 // obtener comentarios de un usuario específico por su id
 const getCommentsByUserId = async (req, res) => {
   try {
-    const user = await getUserFromFirebaseUid(req.user.firebaseUid);
+    const user = await getUserFromFirebaseUid(req.params.userId);
+
 
     const comments = await Comment
     .find({ userId: user._id })

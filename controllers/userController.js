@@ -64,7 +64,7 @@ const getUserByMongoId = async (req, res) => {
 
 // crear un usuario
 const createUser = async (req, res) => {
-  const { firebaseUid, fullName, username, email, genre, password, birthday, profilePicture, bio, tags, favoriteProducts, savedPeople } = req.body;
+  const { firebaseUid, fullName, username, email, gender, password, birthday, profilePicture, bio, tags, favoriteProducts, savedPeople } = req.body;
 
   try {
     const newUser = new User({
@@ -72,7 +72,7 @@ const createUser = async (req, res) => {
       fullName,
       username,
       email,
-      genre,
+      gender,
       password,
       birthday,
       profilePicture,

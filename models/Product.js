@@ -10,10 +10,14 @@ const productSchema = new mongoose.Schema({
       filters: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Filter' }]
     }
   ],
-  genre: { type: String, enum: ['masculino', 'femenino', 'no relevante'], required: false }, // no-relevante significa todo
+  gender: { type: String, enum: ['masculino', 'femenino', 'no relevante'], required: true }, // no-relevante significa todo
   ageRange: { type: String, enum: ['bebé', 'niño', 'adolescente', 'adulto', 'anciano'], required: true }, 
   tags: { type: [String], default: [] }, // "divertido", "educativo" PENDIENTE
-  image: { type: String, required: false }, 
+  image: { type: String, required: true }, 
+  purchaseLocation: {
+    storeName: { type: String, required: false },
+    url: { type: String, required: false }
+  },
   user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true }, // Relación con el usuario que creó el producto
   comments: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Comment' }], 
   commentsCount: { type: Number, default: 0 }, // el nº de comentarios del producto

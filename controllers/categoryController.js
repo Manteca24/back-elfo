@@ -38,22 +38,53 @@ const getCategoryById = async (req, res) => {
 
 // Actualizar una categoría existente por su ID
 const updateCategory = async (req, res) => {
-    const { categoryId } = req.params;
-    const { name} = req.body;
-    try {
-      const category = await Category.findByIdAndUpdate(
-        categoryId,
-        { name},
-        { new: true }
-      );
-      if (!category) {
-        return res.status(404).json({ message: 'Categoría no encontrada' });
-      }
-      res.status(200).json(category);
-    } catch (error) {
-      res.status(500).json({ error: 'Error al actualizar la categoría' });
+  const { categoryId } = req.params;
+  const { name, filters } = req.body;
+
+  try {
+    // Encuentra la categoría existente
+    const category = await Category.findById(categoryId);
+    if (!category) {
+      return res.status(404).json({ message: "Categoría no encontrada" });
     }
-  };
+
+    // Actualiza el nombre de la categoría
+    if (name) {
+      category.name = name;
+    }
+
+    // Asegúrate de que los filtros sean strings
+    const normalizedFilters = filters.map((filter) =>
+      typeof filter === 'string' ? filter : filter.name
+    );
+
+    const updatedFilters = [];
+    for (const filterName of normalizedFilters) {
+      let filter = await Filter.findOne({ name: filterName });
+
+      if (!filter) {
+        // Si no existe el filtro, lo crea
+        filter = new Filter({ name: filterName, category: [category._id] });
+        await filter.save();
+      } else if (!filter.category.includes(category._id)) {
+        // Si el filtro ya existe pero no está vinculado a la categoría, lo actualiza
+        filter.category.push(category._id);
+        await filter.save();
+      }
+
+      updatedFilters.push(filter._id);
+    }
+
+    // Vincula los filtros actualizados a la categoría
+    category.filters = updatedFilters;
+    await category.save();
+
+    res.status(200).json(category);
+  } catch (error) {
+    console.error("Error actualizando categoría:", error);
+    res.status(500).json({ error: "Error al actualizar la categoría" });
+  }
+};
 
 // Eliminar una categoría por su ID
 const deleteCategory = async (req, res) => {
@@ -69,7 +100,7 @@ const deleteCategory = async (req, res) => {
     }
   };
 
-// Añadir un filtro a una categoría
+// Añadir un filtro a una categoría // para poner tags a las categorías ?
 const addFilterToCategory = async (req, res) => {
     const { categoryId } = req.params;
     const { filterId } = req.body;

@@ -1,6 +1,7 @@
 const Product = require('../models/Product');
 const Category = require('../models/Category');
 const Filter = require('../models/Filter');
+const SavedPerson = require('../models/SavedPerson');
 
 // products
 const searchProducts = async (req, res) => {
@@ -82,8 +83,42 @@ const searchFilters = async (req, res) => {
     }
   };
 
+  // buscar por persona
+  const searchByFilters = async (req, res) => {
+    const { personId } = req.params;
+  
+    try {
+      // Obtenemos la persona guardada
+      const savedPerson = await SavedPerson.findById(personId).populate('filters');
+      
+      if (!savedPerson) {
+        return res.status(404).json({ message: 'Persona no encontrada' });
+      }
+  
+      // Ahora, realizamos la búsqueda de productos usando los filtros de esa persona
+      const filters = savedPerson.filters;
+      const filterIds = filters.map(filter => filter._id);
+  
+      const products = await Product.find({
+        filters: { $in: filterIds }
+      });
+  
+      if (products.length === 0) {
+        return res.status(404).json({ message: 'No se encontraron productos' });
+      }
+  
+      res.status(200).json(products);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: 'Error al buscar productos con filtros' });
+    }
+  };
+  
+
+
 module.exports = {
   searchProducts,
   searchCategories,
-  searchFilters
+  searchFilters,
+  searchByFilters
 };

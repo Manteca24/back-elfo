@@ -23,6 +23,26 @@ const getFilters = async (req, res) => {
     }
   }
 
+// Obtener un filtro por ID
+const getFilterById = async (req, res) => {
+  try {
+    const { filterId } = req.params;
+
+    // Buscar el filtro por ID y popular su categoría
+    const filter = await Filter.findById(filterId).populate('category', 'name');
+
+    if (!filter) {
+      return res.status(404).json({ error: 'Filtro no encontrado' });
+    }
+
+    res.status(200).json(filter);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Error al obtener el filtro' });
+  }
+};
+
+
   // añadir tags al filtro
   const addTagsToFilter = async (req, res) => {
     try {
@@ -57,15 +77,16 @@ const getFilters = async (req, res) => {
   const getFiltersGroupedByCategory = async (req, res) => {
     try {
       // Obtenemos las categorías y sus filtros asociados
-      const categories = await Category.find().populate('filters'); 
+      const categories = await Category.find().populate('filters', 'name tags'); 
   
-      // Estructuramos los datos
+      // Estructuramos los datos incluyendo los tags
       const result = categories.map((category) => ({
         _id: category._id,
         name: category.name,
         filters: category.filters.map((filter) => ({
           _id: filter._id,
           name: filter.name,
+          tags: filter.tags, // Incluye los tags aquí
         })),
       }));
   
@@ -77,9 +98,42 @@ const getFilters = async (req, res) => {
     }
   };
 
+  // Eliminar un tag específico de un filtro
+const deleteTagFromFilter = async (req, res) => {
+  try {
+    const { filterId } = req.params; // ID del filtro
+    const { tag } = req.body; // Tag a eliminar
+
+    // Buscar el filtro por su ID
+    const filter = await Filter.findById(filterId);
+
+    if (!filter) {
+      return res.status(404).json({ error: 'Filtro no encontrado' });
+    }
+
+    // Comprobar si el tag existe en el filtro
+    if (!filter.tags.includes(tag)) {
+      return res.status(400).json({ error: 'El tag no existe en este filtro' });
+    }
+
+    // Eliminar el tag
+    filter.tags = filter.tags.filter(existingTag => existingTag !== tag);
+
+    // Guardar los cambios
+    await filter.save();
+
+    res.status(200).json({ message: 'Tag eliminado con éxito', filter });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Error al eliminar el tag del filtro' });
+  }
+};
+
 module.exports = {
     createFilter,
     getFilters,
     addTagsToFilter,
-    getFiltersGroupedByCategory
+    getFiltersGroupedByCategory,
+    getFilterById,
+    deleteTagFromFilter
 }

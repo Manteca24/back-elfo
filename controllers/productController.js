@@ -38,10 +38,11 @@ const createNewProduct = async (req, res) => {
       description,
       price,
       categories, // Esto incluye tanto las categorías como sus filtros
-      genre,
+      gender,
       ageRange,
       tags,
       image,
+      purchaseLocation,
       firebaseUid
     } = req.body;
  
@@ -58,10 +59,11 @@ const createNewProduct = async (req, res) => {
       description,
       price,
       categories, // Ahora es un array de objetos que contiene categorías y filtros
-      genre,
+      gender,
       ageRange,
       tags,
       image,
+      purchaseLocation,
       user
     });
 
