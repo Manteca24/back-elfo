@@ -4,6 +4,7 @@ const getUserFromFirebaseUid = require('../utils/userUtils');
 // Crear una persona guardada
 const addSavedPerson = async (req, res) => {
   const { name, filters } = req.body; // No necesitas pasar firebaseUid, ya lo obtenemos de req.user
+  console.log("Datos recibidos en addSavedPerson:", { name, filters });
 
   try {
     // Obtener el usuario autenticado con firebaseUid

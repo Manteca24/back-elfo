@@ -21,7 +21,7 @@ const userSchema = new mongoose.Schema({
   profilePicture: { type: String, default: null },
   bio: { type: String, maxlength: 280 },
   tags: Product.obj.tags, // Hereda las etiquetas
-  
+
   favoriteProducts: [
     {
       product: { type: mongoose.Schema.Types.ObjectId, ref: 'Product' }, // Producto favorito
@@ -32,7 +32,7 @@ const userSchema = new mongoose.Schema({
   
   savedPeople: [
     {
-      name: { type: String, required: true }, // Nombre de la persona guardada
+      name: { type: String}, // Nombre de la persona guardada
       filters: { type: mongoose.Schema.Types.ObjectId, ref: 'Filter' }, // Filtros asociados a esta persona
     }
   ],
