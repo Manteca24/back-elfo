@@ -1,6 +1,6 @@
 const Product = require("../models/Product")
 
-const createProduct = ({ name, description, price, categories, gender, ageRange, tags, image, user }) => {
+const createProduct = ({ name, description, price, type, purchaseLocation, categories, gender, ageRange, tags, image, user }) => {
   // Le digo: si tags ya es un array, úsalo tal cual; si es una string, divídelo
   const tagArray = Array.isArray(tags) ? tags : (tags ? tags.split(',').map(tag => tag.trim()) : []);
 
@@ -15,6 +15,8 @@ const createProduct = ({ name, description, price, categories, gender, ageRange,
     name,
     description,
     price,
+    type,
+    purchaseLocation,
     categories: formattedCategories, 
     gender,
     ageRange,

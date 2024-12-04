@@ -2,8 +2,7 @@ const Product = require("../models/Product");
 
 // funciones auxiliares
 const { createProduct } = require('../utils/productUtils');
-const getUserFromFirebaseUid = require('../utils/userUtils')
-
+const getUserFromFirebaseUid = require('../utils/userUtils');
 
 // Obtener todos los productos
 const getAllProducts = async (req, res) => {
@@ -30,14 +29,16 @@ const getProductById = async (req, res) => {
   }
 };
 
-// Crear un nuevo producto ESTA FUNCIÓN ESTA GENIAL COMPUESTA!!!!
+// Crear un nuevo producto
 const createNewProduct = async (req, res) => {
   try {
+    console.log('Datos recibidos:', req.body);
     const {
       name,
       description,
       price,
-      categories, // Esto incluye tanto las categorías como sus filtros
+      type,
+      categories, // Ahora incluye categorías y filtros
       gender,
       ageRange,
       tags,
@@ -45,9 +46,10 @@ const createNewProduct = async (req, res) => {
       purchaseLocation,
       firebaseUid
     } = req.body;
- 
+    console.log(type)
+
     const user = await getUserFromFirebaseUid(firebaseUid);
-    console.log(firebaseUid)
+
     // Verificamos que las categorías estén correctamente formateadas como un array de objetos
     if (!Array.isArray(categories) || categories.length === 0) {
       return res.status(400).json({ message: 'Debes proporcionar al menos una categoría con sus filtros.' });
@@ -58,7 +60,8 @@ const createNewProduct = async (req, res) => {
       name,
       description,
       price,
-      categories, // Ahora es un array de objetos que contiene categorías y filtros
+      type,
+      categories, // Es un array de objetos que contiene categorías y filtros
       gender,
       ageRange,
       tags,
