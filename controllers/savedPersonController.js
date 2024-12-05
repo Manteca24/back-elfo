@@ -3,26 +3,29 @@ const getUserFromFirebaseUid = require('../utils/userUtils');
 
 // Crear una persona guardada
 const addSavedPerson = async (req, res) => {
-  const { name, filters } = req.body; // No necesitas pasar firebaseUid, ya lo obtenemos de req.user
-  console.log("Datos recibidos en addSavedPerson:", { name, filters });
+  const { name, gender, ageRange, relation, filters } = req.body;
+  console.log(req.body)
 
   try {
-    // Obtener el usuario autenticado con firebaseUid
-    const user = await getUserFromFirebaseUid(req.uid); //AQUI req.user.firebaseUid
+    const user = await getUserFromFirebaseUid(req.uid);
 
-    // Validar filtros y su estructura
     if (!Array.isArray(filters) || filters.some(f => !f.filterId)) {
       return res.status(400).json({ message: 'Estructura de filtros inválida' });
     }
 
-    // Crear la persona guardada
+    if (!gender || !ageRange || !relation) {
+      return res.status(400).json({ message: 'Género, rango de edad y relación son obligatorios' });
+    }
+
     const savedPerson = await SavedPerson.create({
       userId: user._id,
       name,
+      gender,
+      ageRange,
+      relation,
       filters
     });
 
-    // Añadir la persona al usuario
     user.savedPeople.push(savedPerson._id);
     await user.save();
 
@@ -36,8 +39,7 @@ const addSavedPerson = async (req, res) => {
 // Obtener personas guardadas de un usuario
 const getSavedPeople = async (req, res) => {
   try {
-    // Pasa req.uid directamente, no como parte de un objeto
-    const user = await getUserFromFirebaseUid(req.uid); 
+    const user = await getUserFromFirebaseUid(req.uid);
 
     const savedPeople = await SavedPerson.find({ userId: user._id }).populate({
       path: 'filters.filterId',
@@ -57,7 +59,7 @@ const updateTags = async (req, res) => {
   const { tags } = req.body;
 
   try {
-    const user = await getUserFromFirebaseUid(req.user.firebaseUid);
+    const user = await getUserFromFirebaseUid(req.uid);
     const person = await SavedPerson.findById(personId);
 
     if (!person) return res.status(404).json({ message: 'Persona guardada no encontrada' });
@@ -87,7 +89,7 @@ const removeSavedPerson = async (req, res) => {
   const { personId } = req.params;
 
   try {
-    const user = await getUserFromFirebaseUid(req.user.firebaseUid);
+    const user = await getUserFromFirebaseUid(req.uid);
     const person = await SavedPerson.findById(personId);
 
     if (!person) return res.status(404).json({ message: 'Persona no encontrada' });
