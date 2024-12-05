@@ -43,7 +43,7 @@ const getSavedPeople = async (req, res) => {
 
     const savedPeople = await SavedPerson.find({ userId: user._id }).populate({
       path: 'filters.filterId',
-      select: 'name tags',
+      select: 'name',
     });
 
     res.status(200).json(savedPeople);

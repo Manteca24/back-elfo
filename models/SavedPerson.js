@@ -10,7 +10,7 @@ const savedPersonSchema = new mongoose.Schema({
   filters: [
     {
       filterId: { type: mongoose.Schema.Types.ObjectId, ref: 'Filter', required: true }, // Filtro asociado
-      tags: { type: [String], default: [] }, // Tags asociados a este filtro
+      tags: [{ type: String }]
     }
   ],
   createdAt: { type: Date, default: Date.now }, // Fecha de creación

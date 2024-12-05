@@ -3,6 +3,94 @@ const Category = require('../models/Category');
 const Filter = require('../models/Filter');
 const SavedPerson = require('../models/SavedPerson');
 
+
+// BUSCADOR GENERAL
+
+const searchGifts = async (req, res) => {
+  try {
+    const {
+      gender,
+      ageRange,
+      relation,
+      type,
+      purchaseLocation,
+      price,
+      filters,
+      tags
+    } = req.query;
+    console.log(req.query)
+
+    const orConditions = [];
+
+    // Filtros relacionados con el destinatario
+    if (gender && gender !== 'no relevante') orConditions.push({ gender });
+    if (ageRange) orConditions.push({ ageRange });
+
+    if (relation) {
+      const category = await Category.findOne({ name: relation });
+      if (category) {
+        orConditions.push({
+          categories: {
+            $elemMatch: { category: category._id },
+          },
+        });
+      }
+    }
+
+    // Filtros generales
+    if (filters) {
+      const filterIds = await Filter.find({ name: { $in: filters.split(',') } }).select('_id');
+      orConditions.push({
+        'categories.filters': { $in: filterIds.map(filter => filter._id) },
+      });
+    }
+    if (tags) orConditions.push({ tags: { $in: tags.split(',') } });
+
+    // Filtros de producto
+    if (type) orConditions.push({ type });
+    if (purchaseLocation) orConditions.push({ 'purchaseLocation.ubication': purchaseLocation });
+    if (price) {
+      const priceRanges = {
+        low: { $lte: 20 },
+        medium: { $gt: 20, $lte: 50 },
+        high: { $gt: 50, $lte: 100 },
+        luxury: { $gt: 100 },
+      };
+      orConditions.push({ price: priceRanges[price] });
+    }
+
+    // Si no hay condiciones, devuelve todo (opcional)
+    if (orConditions.length === 0) {
+      return res.status(200).json([]);
+    }
+
+    // Consulta con `$or`
+    const query = { $or: orConditions };
+
+    // Búsqueda de productos
+    const products = await Product.find(query)
+      .populate('categories.category', 'name') // Opcional
+      .populate('categories.filters', 'name') // Opcional
+      .select('-comments') // Opcional
+      .exec();
+
+    res.status(200).json(products);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Error al realizar la búsqueda' });
+  }
+};
+
+
+
+
+
+
+
+
+
+
+
 // products
 const searchProducts = async (req, res) => {
   const { query } = req.query;  
@@ -117,6 +205,7 @@ const searchFilters = async (req, res) => {
 
 
 module.exports = {
+  searchGifts,
   searchProducts,
   searchCategories,
   searchFilters,
