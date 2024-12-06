@@ -38,6 +38,8 @@ const getUserById = async (req, res) => {
   try {
 
     const user = await getUserFromFirebaseUid(req.uid);
+    
+   
 
       res.status(200).json({user});
   } catch (error) {

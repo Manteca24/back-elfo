@@ -42,11 +42,11 @@ const createNewProduct = async (req, res) => {
       gender,
       ageRange,
       tags,
+      relation,
       image,
       purchaseLocation,
       firebaseUid
     } = req.body;
-    console.log(type)
 
     const user = await getUserFromFirebaseUid(firebaseUid);
 
@@ -64,6 +64,7 @@ const createNewProduct = async (req, res) => {
       categories, // Es un array de objetos que contiene categorías y filtros
       gender,
       ageRange,
+      relation,
       tags,
       image,
       purchaseLocation,

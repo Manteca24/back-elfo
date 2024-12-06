@@ -57,7 +57,8 @@ const getSavedPeople = async (req, res) => {
 const updateTags = async (req, res) => {
   const { personId, filterId } = req.params;
   const { tags } = req.body;
-
+  console.log(req.body)
+  console.log(req.uid)
   try {
     const user = await getUserFromFirebaseUid(req.uid);
     const person = await SavedPerson.findById(personId);

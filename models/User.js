@@ -32,7 +32,7 @@ const userSchema = new mongoose.Schema({
   
   savedPeople: [
     {
-      name: { type: String}, // Nombre de la persona guardada
+      name: { type: mongoose.Schema.Types.ObjectId, ref: 'SavedPerson' },
       filters: { type: mongoose.Schema.Types.ObjectId, ref: 'Filter' }, // Filtros asociados a esta persona
     }
   ],

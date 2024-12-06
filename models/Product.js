@@ -14,13 +14,19 @@ const productSchema = new mongoose.Schema({
   },
   image: { type: String, required: true }, 
   // en cuanto a la persona a la que se lo regalaste...
+  relation: {type: String, enum: ["madre", "padre", "hermana", "hermano", "hija", "hijo", "abuela", "abuelo", "tía", "tío", "prima", "primo", "amiga", "amigo", "sobrina", "sobrino", "pareja", "novia", "novio", "esposo", "esposa", "compañero de trabajo", "compañera de trabajo", "jefe", "jefa", "vecino", "profesor", "alumno", "alumna", "profesora", "vecina", "cliente", "mascota"], required: true },
   categories: [
     {
       category: { type: mongoose.Schema.Types.ObjectId, ref: 'Category', required: true },
-      filters: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Filter', unique: true }]
+      filters: [
+        {
+          filter: { type: mongoose.Schema.Types.ObjectId, ref: 'Filter', required: true },
+          selectedTags: [{ type: String }]  // Los tags seleccionados por el usuario
+        }
+      ]
     }
   ],
-  gender: { type: String, enum: ['masculino', 'femenino', 'no relevante'], required: true }, // no-relevante significa todo
+  gender: { type: String, enum: ['masculino', 'femenino', 'no-relevante'], required: true }, // no-relevante significa todo
   ageRange: { type: String, enum: ['bebé', 'niño', 'adolescente', 'adulto', 'anciano'], required: true }, 
   // tú:
   user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true }, // Relación con el usuario que creó el producto
