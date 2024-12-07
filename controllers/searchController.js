@@ -94,7 +94,7 @@ const searchGifts = async (req, res) => {
 // products
 const searchProducts = async (req, res) => {
   const { query } = req.query;  
-
+  query = query.trim().replace(/[\*\+\/\-\.\^\$\(\)\\]/g, "");
   try {
     const products = await Product.find({
         $text: { $search: query }

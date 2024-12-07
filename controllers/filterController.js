@@ -16,7 +16,6 @@ const createFilter = async (req, res) => {
 const getFilters = async (req, res) => {
     try {
       const filters = await Filter.find().populate('category', 'name');
-      console.log(filters)
       res.status(200).json(filters);
     } catch (error) {
       res.status(500).json({ error: 'Error al obtener filtros' });

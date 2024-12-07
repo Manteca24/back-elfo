@@ -37,7 +37,7 @@ const productSchema = new mongoose.Schema({
 
 productSchema.index(
   { name: 'text', description: 'text', tags: 'text' },
-  { weights: { name: 10, description: 5, tags: 1 } } // Prioriza el nombre
+  { weights: { name: 10, description: 8, relation: 5, tags: 1 } } // Prioriza el nombre
 );
 
 // // Si la compra es online, es obligatorio rellenar alguno de los campos "URL" o "StoreName"
