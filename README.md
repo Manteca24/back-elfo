@@ -61,7 +61,7 @@ El back de ELFO está desplegado en Render y se puede ver en el siguiente enlace
 - `PUT /users/saved-people/:personId/filters/:filterId/tags`: Actualizar los tags de una persona en "mis personas" (requiere token de autenticación, solo para usuario o administrador).
 - `DELETE /users/saved-people/:personId`: Eliminar una persona de "mis personas" (requiere token de autenticación, solo para usuario o administrador).
 
-### Productos
+#### Productos
 
 - `GET /products/`: Obtener todos los productos.
 - `GET /products/:id`: Obtener un producto por su ID.
@@ -70,7 +70,7 @@ El back de ELFO está desplegado en Render y se puede ver en el siguiente enlace
 - `DELETE /products/:id`: Eliminar un producto por su ID (solo el creador o administrador).
 - `POST /products/:productId/addCategory/:categoryId`: Añadir una categoría existente a un producto existente.
 
-### Comentarios
+#### Comentarios
 
 - `POST /comments/:productId`: Crear un comentario en un producto (solo usuarios registrados).
 - `GET /comments/product/:productId`: Obtener los comentarios de un producto.
@@ -78,7 +78,7 @@ El back de ELFO está desplegado en Render y se puede ver en el siguiente enlace
 - `PUT /comments/:commentId`: Editar un comentario en un producto (solo el usuario que lo creó).
 - `DELETE /comments/:commentId`: Borrar un comentario en un producto (solo el administrador).
 
-### Filtros
+#### Filtros
 
 - `POST /filters/`: Crear un filtro.
 - `GET /filters/`: Obtener todos los filtros.
@@ -87,7 +87,7 @@ El back de ELFO está desplegado en Render y se puede ver en el siguiente enlace
 - `GET /filters/:filterId`: Obtener un filtro por ID.
 - `DELETE /filters/:filterId/tags`: Eliminar un tag de un filtro.
 
-### Búsqueda
+#### Búsqueda
 
 - `GET /search/`: Buscar regalos.
 - `GET /search/products`: Buscar productos.
@@ -106,12 +106,14 @@ El back de ELFO está desplegado en Render y se puede ver en el siguiente enlace
 
 1. Clona el repositorio:
 
+```
    > git clone <https://github.com/Manteca24/back-elfo.git>
    > cd elfo-backend
    > npm install
    > // Crea un archivo .env en la raíz del proyecto y agrega tus variables de entorno:
    > MONGO_URI=<tu URI de MongoDB Atlas>
    > npm start
+```
 
 ## Base de Datos
 
