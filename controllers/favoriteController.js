@@ -50,8 +50,9 @@ const getFavorites = async (req, res) => {
     const user = await getUserFromFirebaseUid(req.uid)
     
     await user.populate({
-      path: 'favoriteProducts.product',
-      select: 'name image'}) // Poblamos los datos del producto
+      path: 'favoriteProducts.product', // El campo que quieres poblar
+      select: 'name image' // Los campos que quieres que se incluyan
+    }); // Poblamos los datos del producto
     // }).populate({
     //   path: 'favoriteProducts.relatedPerson',
     //   select: 'name filters', // Poblamos los datos de la persona guardada
