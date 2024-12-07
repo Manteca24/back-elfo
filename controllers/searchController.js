@@ -22,7 +22,6 @@ const searchGifts = async (req, res) => {
 
     const orConditions = [];
 
-    // Filtros relacionados con el destinatario
     if (gender && gender !== 'no relevante') orConditions.push({ gender });
     if (ageRange) orConditions.push({ ageRange });
 
@@ -37,7 +36,6 @@ const searchGifts = async (req, res) => {
       }
     }
 
-    // Filtros generales
     if (filters) {
       const filterIds = await Filter.find({ name: { $in: filters.split(',') } }).select('_id');
       orConditions.push({
@@ -46,7 +44,6 @@ const searchGifts = async (req, res) => {
     }
     if (tags) orConditions.push({ tags: { $in: tags.split(',') } });
 
-    // Filtros de producto
     if (type) orConditions.push({ type });
     if (purchaseLocation) orConditions.push({ 'purchaseLocation.ubication': purchaseLocation });
     if (price) {
@@ -59,15 +56,12 @@ const searchGifts = async (req, res) => {
       orConditions.push({ price: priceRanges[price] });
     }
 
-    // Si no hay condiciones, devuelve todo (opcional)
     if (orConditions.length === 0) {
       return res.status(200).json([]);
     }
 
-    // Consulta con `$or`
     const query = { $or: orConditions };
 
-    // Búsqueda de productos
     const products = await Product.find(query)
       .populate('categories.category', 'name') // Opcional
       .populate('categories.filters', 'name') // Opcional
@@ -82,25 +76,15 @@ const searchGifts = async (req, res) => {
 };
 
 
-
-
-
-
-
-
-
-
-
 // products
 const searchProducts = async (req, res) => {
-  const { query } = req.query;  
+  let { query } = req.query;  
   query = query.trim().replace(/[\*\+\/\-\.\^\$\(\)\\]/g, "");
   try {
     const products = await Product.find({
         $text: { $search: query }
       }, { score: { $meta: "textScore" } })
       .sort({ score: { $meta: "textScore" } });
-      // Usando un índice de texto en MongoDB
     
     if (!products || products.length === 0) {
       return res.status(404).json({ message: 'No se encontraron productos' });
@@ -122,7 +106,6 @@ const searchCategories = async (req, res) => {
             $text: { $search: query }
           }, { score: { $meta: "textScore" } })
           .sort({ score: { $meta: "textScore" } });
-          // categorías ordenadas según la relevancia del texto buscado
   
       if (!categories || categories.length === 0) {
         return res.status(404).json({ message: 'No se encontraron categorías' });
@@ -141,25 +124,20 @@ const searchFilters = async (req, res) => {
     const { query } = req.query;
   
     try {
-      // Buscar filtros por texto que funciona mejor en mongo
       const filtersByText = await Filter.find({
         $text: { $search: query }
       }, { score: { $meta: "textScore" } })
       .sort({ score: { $meta: "textScore" } });
   
-      // Buscar filtros por regex en los tags porque los tags me interesa que los busque más por letras
       const filtersByRegex = await Filter.find({
-        tags: { $regex: query, $options: 'i' }  // Buscando en los tags con 'i' para que no importe mayúsculas
+        tags: { $regex: query, $options: 'i' }  
       });
   
-      // Combinar ambas búsquedas (filtros por texto y filtros por regex)
       const combinedFilters = [...filtersByText, ...filtersByRegex];
   
-      // Eliminar duplicados (por si se repiten los mismos filtros en ambas búsquedas)
       const uniqueFilters = [...new Set(combinedFilters.map(f => f._id.toString()))]
         .map(id => combinedFilters.find(f => f._id.toString() === id));
   
-      // Si no se encontraron filtros
       if (!uniqueFilters || uniqueFilters.length === 0) {
         return res.status(404).json({ message: 'No se encontraron filtros' });
       }
@@ -176,14 +154,12 @@ const searchFilters = async (req, res) => {
     const { personId } = req.params;
   
     try {
-      // Obtenemos la persona guardada
       const savedPerson = await SavedPerson.findById(personId).populate('filters');
       
       if (!savedPerson) {
         return res.status(404).json({ message: 'Persona no encontrada' });
       }
   
-      // Ahora, realizamos la búsqueda de productos usando los filtros de esa persona
       const filters = savedPerson.filters;
       const filterIds = filters.map(filter => filter._id);
   
