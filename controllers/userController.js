@@ -94,7 +94,8 @@ const createUser = async (req, res) => {
 // Actualizar un usuario por su ID
 const updateUser = async (req, res) => {
   try {
-    const user = await getUserFromFirebaseUid(req.user.firebaseUid);
+    console.log(req.uid)
+    const user = await getUserFromFirebaseUid(req.uid);
       
       // Actualizar los campos del usuario
       const { fullName, email, password, birthday, profilePicture, bio, tags, favoriteProducts, isAdmin, status, savedPeople } = req.body;
