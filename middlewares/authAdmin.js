@@ -2,7 +2,6 @@ const verifyAdmin = async (req, res, next) => {
     const { firebaseUid } = req.user; // Obtener el firebaseUid del req.user
   
     try {
-      // Aquí se asume que tienes un modelo User para poder verificar si es admin
       const user = await User.findOne({ firebaseUid });
   
       if (!user) {
