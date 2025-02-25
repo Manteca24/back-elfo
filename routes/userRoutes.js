@@ -34,7 +34,7 @@ router.delete('/user', verifyToken, deleteUser) // borrar usuario (SOLO USER Y A
 
 router.post('/favorites', verifyToken, addFavorite); // añadir producto favorito y persona a la que se lo regalarías (SOLO USER Y ADMIN)
 router.get('/favorites', verifyToken, getFavorites); // obtener favoritos de un usuario y sus "para quién" (SOLO USER Y ADMIN)
-router.delete('/favorites/:favoriteId', verifyToken, removeFavorite); // borrar favorito (SOLO USER Y ADMIN)
+router.delete('/favorites', verifyToken, removeFavorite); // borrar favorito (SOLO USER Y ADMIN)
 
 
 router.post('/saved-people', verifyToken, addSavedPerson); // añadir una persona a "mis personas" con sus propios filtros guardados (SOLO USER Y ADMIN)

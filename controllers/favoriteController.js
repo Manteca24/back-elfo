@@ -33,6 +33,7 @@ const addFavorite = async (req, res) => {
       ...(relatedPersonId && { relatedPerson: relatedPersonId }), // Añadir solo si relatedPersonId existe
     });
     await user.save();
+    console.log("✅ Updated favorites:", user.favoriteProducts.length);
 
     res.status(200).json({
       message: 'Producto añadido a favoritos',
@@ -57,7 +58,9 @@ const getFavorites = async (req, res) => {
     //   path: 'favoriteProducts.relatedPerson',
     //   select: 'name filters', // Poblamos los datos de la persona guardada
     // });
-    console.log(user.favoriteProducts);
+
+
+    // console.log(user.favoriteProducts);
 
     res.status(200).json(user.favoriteProducts);
   } catch (error) {
@@ -68,20 +71,27 @@ const getFavorites = async (req, res) => {
 
 // Eliminar un favorito
 const removeFavorite = async (req, res) => {
-  const { favoriteId } = req.params;
+  const { productId } = req.body; // Expecting productId instead of favoriteId
+  console.log(productId)
 
   try {
     const user = await getUserFromFirebaseUid(req.uid);
-    // Filtrar el favorito
-    user.favoriteProducts = user.favoriteProducts.filter(
-      (fav) => fav._id.toString() !== favoriteId
-    );
 
+    // Filter out the product using the productId, not the favorite entry ID
+    user.favoriteProducts = user.favoriteProducts.filter(
+      (fav) => fav.product.toString() !== productId
+    );
+    
     await user.save();
-    res.status(200).json({ message: 'Favorito eliminado', favoriteProducts: user.favoriteProducts });
+    console.log("✅ After removal:", user.favoriteProducts.length)
+
+    res.status(200).json({ 
+      message: 'Favorite removed', 
+      favoriteProducts: user.favoriteProducts 
+    });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: 'Error al eliminar el favorito' });
+    res.status(500).json({ message: 'Error removing favorite' });
   }
 };
 
