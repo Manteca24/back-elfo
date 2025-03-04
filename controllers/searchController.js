@@ -4,13 +4,13 @@ const Filter = require('../models/Filter');
 const SavedPerson = require('../models/SavedPerson');
 
 
-// BUSCADOR GENERAL
+// BUSCADOR GENERAL REGALOS
 
 const searchGifts = async (req, res) => {
   try {
     const { gender, ageRange, relation, type, purchaseLocation, price, filters, tags } = req.query;
 
-    console.log("Received Query Parameters:", req.query);
+    // console.log("Received Query Parameters:", req.query);
 
     // Required filters (strict match)
     const andConditions = [];
@@ -42,8 +42,8 @@ const searchGifts = async (req, res) => {
 
     if (tags) orConditions.push({ tags: { $in: tags.split(',') } });
 
-    console.log("Strict Conditions (AND):", andConditions);
-    console.log("Flexible Conditions (OR):", orConditions);
+    // console.log("Strict Conditions (AND):", andConditions);
+    // console.log("Flexible Conditions (OR):", orConditions);
 
     // Build the final query
     const query = { $and: andConditions };
@@ -54,7 +54,7 @@ const searchGifts = async (req, res) => {
     // Execute the search
     const products = await Product.find(query).lean();
 
-    console.log(`Found ${products.length} matching products.`);
+    // console.log(`Found ${products.length} matching products.`);
     
     res.status(200).json(products);
   } catch (error) {
