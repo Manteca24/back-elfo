@@ -33,7 +33,7 @@ const addFavorite = async (req, res) => {
       ...(relatedPersonId && { relatedPerson: relatedPersonId }), // Añadir solo si relatedPersonId existe
     });
     await user.save();
-    console.log("✅ Updated favorites:", user.favoriteProducts.length);
+    // console.log("Updated favorites:", user.favoriteProducts.length);
 
     res.status(200).json({
       message: 'Producto añadido a favoritos',
@@ -72,7 +72,7 @@ const getFavorites = async (req, res) => {
 // Eliminar un favorito
 const removeFavorite = async (req, res) => {
   const { productId } = req.body; // Expecting productId instead of favoriteId
-  console.log(productId)
+  // console.log(productId)
 
   try {
     const user = await getUserFromFirebaseUid(req.uid);
@@ -83,7 +83,7 @@ const removeFavorite = async (req, res) => {
     );
     
     await user.save();
-    console.log("✅ After removal:", user.favoriteProducts.length)
+    // console.log("After removal:", user.favoriteProducts.length)
 
     res.status(200).json({ 
       message: 'Favorite removed', 

@@ -8,44 +8,16 @@ const SavedPerson = require('../models/SavedPerson');
 
 const searchGifts = async (req, res) => {
   try {
-    const {
-      gender,
-      ageRange,
-      relation,
-      type,
-      purchaseLocation,
-      price,
-      filters,
-      tags
-    } = req.query;
-    console.log(req.query)
+    const { gender, ageRange, relation, type, purchaseLocation, price, filters, tags } = req.query;
 
-    const orConditions = [];
+    console.log("Received Query Parameters:", req.query);
 
-    if (gender && gender !== 'no relevante') orConditions.push({ gender });
-    if (ageRange) orConditions.push({ ageRange });
+    // Required filters (strict match)
+    const andConditions = [];
+    if (gender && gender !== 'no relevante') andConditions.push({ gender });
+    if (ageRange) andConditions.push({ ageRange });
+    if (type) andConditions.push({ type });
 
-    if (relation) {
-      const category = await Category.findOne({ name: relation });
-      if (category) {
-        orConditions.push({
-          categories: {
-            $elemMatch: { category: category._id },
-          },
-        });
-      }
-    }
-
-    if (filters) {
-      const filterIds = await Filter.find({ name: { $in: filters.split(',') } }).select('_id');
-      orConditions.push({
-        'categories.filters': { $in: filterIds.map(filter => filter._id) },
-      });
-    }
-    if (tags) orConditions.push({ tags: { $in: tags.split(',') } });
-
-    if (type) orConditions.push({ type });
-    if (purchaseLocation) orConditions.push({ 'purchaseLocation.ubication': purchaseLocation });
     if (price) {
       const priceRanges = {
         low: { $lte: 20 },
@@ -53,27 +25,45 @@ const searchGifts = async (req, res) => {
         high: { $gt: 50, $lte: 100 },
         luxury: { $gt: 100 },
       };
-      orConditions.push({ price: priceRanges[price] });
+      andConditions.push({ price: priceRanges[price] });
     }
 
-    if (orConditions.length === 0) {
-      return res.status(200).json([]);
+    // Optional filters (boost relevance but not mandatory)
+    const orConditions = [];
+    if (relation) orConditions.push({ relation });
+    if (purchaseLocation) orConditions.push({ 'purchaseLocation.ubication': purchaseLocation });
+
+    if (filters && Array.isArray(filters)) {
+      const filterIds = await Filter.find({ name: { $in: filters } }).select('_id');
+      if (filterIds.length > 0) {
+        orConditions.push({ 'categories.filters': { $in: filterIds.map(f => f._id) } });
+      }
     }
 
-    const query = { $or: orConditions };
+    if (tags) orConditions.push({ tags: { $in: tags.split(',') } });
 
-    const products = await Product.find(query)
-      .populate('categories.category', 'name') // Opcional
-      .populate('categories.filters', 'name') // Opcional
-      .select('-comments') // Opcional
-      .exec();
+    console.log("Strict Conditions (AND):", andConditions);
+    console.log("Flexible Conditions (OR):", orConditions);
 
+    // Build the final query
+    const query = { $and: andConditions };
+    if (orConditions.length > 0) {
+      query.$or = orConditions;
+    }
+
+    // Execute the search
+    const products = await Product.find(query).lean();
+
+    console.log(`Found ${products.length} matching products.`);
+    
     res.status(200).json(products);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: 'Error al realizar la búsqueda' });
+    res.status(500).json({ error: 'Error searching for gifts' });
   }
 };
+
+
 
 
 // products
