@@ -99,13 +99,16 @@ const updateComment = async (req, res) => {
       return res.status(403).json({ message: 'No tienes permiso para editar este comentario' });
     }
     
-        comment.comment = newComment;
+    // Append "(editado)" only if it's not already there
+    comment.comment = newComment.includes("(editado)") ? newComment : `${newComment} (editado)`;
+    comment.edited = true;
     await comment.save();
-    
-    res.status(200).json({ message: 'Comentario actualizado', comment });
-  } catch (error) {
-    res.status(400).json({ message: error.message });
-  }
+
+    res.json(comment);
+} catch (error) {
+    console.error("Error updating comment:", error);
+    res.status(500).json({ error: "Internal server error" });
+}
 };
 
 
