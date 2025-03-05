@@ -111,4 +111,27 @@ const removeSavedPerson = async (req, res) => {
   }
 };
 
-module.exports = { addSavedPerson, getSavedPeople, removeSavedPerson, updateTags };
+const removeFilterFromSavedPerson = async (req, res) => {
+  const { personId, filterId } = req.params;
+
+  try {
+    const user = await getUserFromFirebaseUid(req.uid);
+    const person = await SavedPerson.findById(personId);
+
+    if (!person) return res.status(404).json({ message: 'Persona no encontrada' });
+    if (person.userId.toString() !== user._id.toString()) {
+      return res.status(403).json({ message: 'No tienes permiso para modificar esta persona guardada' });
+    }
+
+    // Remove the filter from the person's filters array
+    person.filters = person.filters.filter(f => f.filterId.toString() !== filterId);
+    await person.save();
+
+    res.status(200).json({ message: 'Filtro eliminado', savedPerson: person });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Error al eliminar el filtro' });
+  }
+};
+
+module.exports = { addSavedPerson, getSavedPeople, removeSavedPerson, updateTags, removeFilterFromSavedPerson, };

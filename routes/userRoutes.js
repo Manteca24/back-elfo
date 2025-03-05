@@ -20,7 +20,8 @@ const {
     addSavedPerson,
     getSavedPeople,
     removeSavedPerson,
-    updateTags
+    updateTags,
+    removeFilterFromSavedPerson
 } = require('../controllers/savedPersonController')
 
 router.get('/', getUsers); // obtener todos los usuarios
@@ -41,6 +42,7 @@ router.post('/saved-people', verifyToken, addSavedPerson); // añadir una person
 router.get('/saved-people/', verifyToken, getSavedPeople); // obtener "mis personas" de un usuario concreto por su id (SOLO USER Y ADMIN)
 router.put('/saved-people/:personId/filters/:filterId/tags', verifyToken, updateTags);
  // actualizar los tags de una de tus personas (SOLO USER Y ADMIN)
+router.delete('/saved-people/:personId/filters/:filterId', verifyToken, removeFilterFromSavedPerson);
 router.delete('/saved-people/:personId', removeSavedPerson); // borrar una persona de "tus personas" (SOLO USER Y ADMIN)
 
 module.exports = router;
