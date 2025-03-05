@@ -20,7 +20,7 @@ const productSchema = new mongoose.Schema({
       category: { type: mongoose.Schema.Types.ObjectId, ref: 'Category', required: true },
       filters: [
         {
-          filter: { type: mongoose.Schema.Types.ObjectId, ref: 'Filter', required: true },
+          filter: { type: mongoose.Schema.Types.ObjectId, ref: 'Filter'},
           selectedTags: [{ type: String }]  // Los tags seleccionados por el usuario
         }
       ]

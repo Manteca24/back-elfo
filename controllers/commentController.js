@@ -1,5 +1,6 @@
 const Comment = require('../models/Comment');
 const Product = require('../models/Product');
+const User = require('../models/User');
 
 // funciones auxiliares
 const getUserFromFirebaseUid = require('../utils/userUtils')
@@ -7,34 +8,39 @@ const getUserFromFirebaseUid = require('../utils/userUtils')
 // crear comentario
 const addComment = async (req, res) => {
   const { productId } = req.params;
-  const { comment, firebaseUid } = req.body;
+  const { comment } = req.body;
+
   try {
     // Obtener usuario autenticado desde Firebase
-    const user = await getUserFromFirebaseUid(firebaseUid);
-    
+    const user = await getUserFromFirebaseUid(req.uid);
+    if (!user) return res.status(404).json({ message: 'Usuario no encontrado' });
+
     const product = await Product.findById(productId);
+    console.log("USER", user, "PRODUCT", product)
     if (!product) return res.status(404).json({ message: 'Producto no encontrado' });
-    
+
     const newComment = new Comment({ 
-      productId: productId, 
+      productId, 
       userId: user._id,
       comment 
     });
 
+    // Guardar el comentario primero
     await newComment.save();
 
-    // en User...actualizar el usuario con el ID del nuevo comentario
+    // Agregar el comentario a la lista de comentarios del usuario y del producto
     user.comments.push(newComment._id);
-    await user.save();
-
-    // en Product...añadir el comentario al producto y actualizar el contador
     product.comments.push(newComment._id);
-    product.commentsCount = product.comments.length; 
+    product.commentsCount = product.comments.length;
+
+    // Guardar ambos modelos en paralelo
+    await user.save()
     await product.save();
 
     res.status(201).json(newComment);
   } catch (error) {
-    res.status(400).json({ message: error.message });
+    console.error("Error al agregar comentario:", error);
+    res.status(500).json({ message: "Error al agregar el comentario." });
   }
 };
 
@@ -79,6 +85,8 @@ const getCommentsByUserId = async (req, res) => {
 const updateComment = async (req, res) => {
   const { commentId } = req.params;
   const { newComment } = req.body; // 'newComment' es el nuevo texto del comentario
+  const user = await getUserFromFirebaseUid(req.uid);
+  console.log(req.uid)
 
   try {
     const comment = await Comment.findById(commentId);
@@ -87,7 +95,7 @@ const updateComment = async (req, res) => {
     }
 
     // verificar que el usuario que intenta editar el comentario es el autor - prueba! cambiar después de firebase
-    if (comment.userId.toString() !== req.user.firebaseUid) {
+    if (comment.userId.toString() !== user._id.toString()) { 
       return res.status(403).json({ message: 'No tienes permiso para editar este comentario' });
     }
     
@@ -104,24 +112,31 @@ const updateComment = async (req, res) => {
 // borrar comentario
 const deleteComment = async (req, res) => {
   const { commentId } = req.params;
+  const user = await getUserFromFirebaseUid(req.uid);
 
   try {
     const comment = await Comment.findById(commentId);
     if (!comment) return res.status(404).json({ message: 'Comentario no encontrado' });
-  
-    // Verificar que el usuario autenticado sea el autor del comentario
-  if (comment.userId.toString() !== req.user.firebaseUid) {
-    return res.status(403).json({ message: 'No tienes permiso para eliminar este comentario' });
-  }
+
+    console.log(comment.userId.toString(), "=?", user._id.toString());
+
+    // Verificar que el usuario autenticado sea el autor del comentario o un admin
+    if (comment.userId.toString() !== user._id.toString() && !user.isAdmin) {
+      return res.status(403).json({ message: 'No tienes permiso para eliminar este comentario' });
+    }
 
     const product = await Product.findById(comment.productId);
     if (!product) return res.status(404).json({ message: 'Producto no encontrado' });
 
-    product.comments = product.comments.filter(comment => comment.toString() !== commentId);
-    product.commentsCount = product.comments.length; 
+    console.log(product.comments);
+
+    // Filtrar el comentario eliminado del array y actualizar el contador
+    product.comments = product.comments.filter(c => c.toString() !== commentId.toString());
+    product.commentsCount = product.comments.length;
+
+    console.log(product);
 
     await product.save();
-
     await Comment.findByIdAndDelete(commentId);
 
     res.status(200).json({ message: 'Comentario eliminado' });
@@ -129,6 +144,7 @@ const deleteComment = async (req, res) => {
     res.status(400).json({ message: error.message });
   }
 };
+
 
 module.exports = {
   addComment,
