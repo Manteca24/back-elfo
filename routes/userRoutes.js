@@ -43,6 +43,6 @@ router.get('/saved-people/', verifyToken, getSavedPeople); // obtener "mis perso
 router.put('/saved-people/:personId/filters/:filterId/tags', verifyToken, updateTags);
  // actualizar los tags de una de tus personas (SOLO USER Y ADMIN)
 router.delete('/saved-people/:personId/filters/:filterId', verifyToken, removeFilterFromSavedPerson);
-router.delete('/saved-people/:personId', removeSavedPerson); // borrar una persona de "tus personas" (SOLO USER Y ADMIN)
+router.delete('/saved-people/:personId', verifyToken, removeSavedPerson); // borrar una persona de "tus personas" (SOLO USER Y ADMIN)
 
 module.exports = router;
