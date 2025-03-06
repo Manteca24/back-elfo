@@ -50,7 +50,8 @@ const getCommentsByProduct = async (req, res) => {
 
   try {
     const comments = await Comment.find({ productId })
-    .populate('userId', 'username profilePicture createdAt isAdmin'); 
+      .populate('userId', 'username profilePicture createdAt isAdmin')
+      .sort({ createdAt: -1 }); // Sort comments by createdAt in descending order
     res.json(comments);
 
   } catch (error) {
@@ -59,14 +60,15 @@ const getCommentsByProduct = async (req, res) => {
 };
 
 // obtener comentarios de un usuario específico por su id
+// obtener comentarios de un usuario específico por su id
 const getCommentsByUserId = async (req, res) => {
   try {
     const user = await getUserFromFirebaseUid(req.params.userId);
 
-
     const comments = await Comment
-    .find({ userId: user._id })
-    .populate('productId', 'name')
+      .find({ userId: user._id })
+      .populate('productId', 'name')
+      .sort({ createdAt: -1 }); // Sort comments by createdAt in descending order
     
     if (comments.length === 0) {
       return res.status(404).json({ message: 'No se encontraron comentarios para este usuario' });
@@ -78,6 +80,7 @@ const getCommentsByUserId = async (req, res) => {
     res.status(400).json({ message: error.message });
   }
 };
+
 
 
 
